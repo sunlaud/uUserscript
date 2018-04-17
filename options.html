@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+        body * {margin: 0.2rem;}
+        textarea {height: 40em; width: 50em;}
+        select {display: block; width: 20em;}
+        .left {float: left;}
+        #url {width: 20em;}
+        /*input:invalid { border: 1px red solid; }*/
+    </style>
+  </head>
+
+<body>
+    <div>
+        <div class="left">
+            <button id="new">New</button>
+            <select id="urls" size="20"></select>
+        </div>
+        <div class="left">
+            <div>
+                <input id="url" type="text" placeholder="url" required="required"></input>
+                <button id="save">Save</button>
+                <button id="remove">Remove</button>
+            </div>
+            <textarea id="script" placeholder="script to inject" required="required"></textarea>
+        </div>
+    </div>
+  <script src="options.js"></script>
+</body>
+
+</html>
