@@ -5,29 +5,43 @@
     <meta charset="utf-8">
     <style>
         body * {margin: 0.2rem;}
-        textarea {height: 40em; width: 50em;}
-        select {display: block; width: 20em;}
-        .left {float: left;}
-        #url {width: 20em;}
-        /*input:invalid { border: 1px red solid; }*/
+        body {}
+        textarea {height: 100%; width: 100%; min-height: 20rem;}
+        select {display: block; width: 15rem;}
+
+        input:invalid, textarea:invalid { border: 1px red solid; box-shadow: 0px 0px 4px red; }
+        input#url {
+            flex: auto;
+        }
+        #editcontrols {
+            color: red;
+            display: flex;
+        }
+        form {
+            display: flex;
+        }
+        .editscript {
+            flex: auto;
+        }
     </style>
   </head>
 
 <body>
-    <div>
-        <div class="left">
+    <form>
+        <div>
             <button id="new">New</button>
+            <button id="export">Export settings</button>
             <select id="urls" size="20"></select>
         </div>
-        <div class="left">
-            <div>
-                <input id="url" type="text" placeholder="url" required="required"></input>
-                <button id="save">Save</button>
-                <button id="remove">Remove</button>
+        <div class="editscript">
+            <div id="editcontrols">
+                <input id="url" type="text" placeholder="url regexp (e.g. https*://gmail\.com)" required="required"></input>
+                <input id="save" type="submit" value="Save"></input>
+                <button id="remove">Remove</input>
             </div>
             <textarea id="script" placeholder="script to inject" required="required"></textarea>
         </div>
-    </div>
+    </form>
   <script src="options.js"></script>
 </body>
 
