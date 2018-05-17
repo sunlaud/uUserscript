@@ -1,12 +1,7 @@
-var scriptsByUrl;
+var settings = {
+    scriptsByUrl: {}
+}
 
-var urlSelect = document.querySelector("#urls");
-var scriptInput = document.querySelector("#script");
-var urlInput = document.querySelector("#url");
-var newButton = document.querySelector("#new");
-var exportButton = document.querySelector("#export");
-var removeButton = document.querySelector("#remove");
-var form = document.querySelector("form");
 /*
 var emalutadData = {};
 var browser = { storage: {local: {
@@ -15,99 +10,100 @@ var browser = { storage: {local: {
 }}}
 */
 
+
 function init() {
-    browser.storage.local.get().then((data) => {
-        scriptsByUrl = data;
-        Object.keys(scriptsByUrl).forEach(addUrlToSelect);
+    let urlSelect = document.querySelector("#urls");
+    let scriptInput = document.querySelector("#script");
+    let urlInput = document.querySelector("#url");
+    let newButton = document.querySelector("#new");
+    let exportButton = document.querySelector("#export");
+    let removeButton = document.querySelector("#remove");
+    let form = document.querySelector("form");
+
+    urlSelect.onchange = () => {
+        let url = urlSelect.value;
+        removeButton.disabled = !url;
+        urlInput.value = url;
+        scriptInput.value = settings.scriptsByUrl[url] || "";
+    };
+
+    newButton.onclick = (event) => {
+        event.preventDefault();
+        selectUrl(-1);
+    };
+
+    removeButton.onclick = removeSelectedUserscript;
+    form.onsubmit = saveUserscript;
+    exportButton.onclick = exportSettings;
+
+    browser.storage.local.get(settings).then(storedSettings => {
+        settings = storedSettings;
+        Object.keys(settings.scriptsByUrl).forEach(addUrlToSelect);
         selectUrl(0);
     }).catch((error) => alert("Failed to load config data: " + error));
-}
 
-function addUrlToSelect(url) {
-    let option = document.createElement("option");
-    option.value = url;
-    option.text = url;
-    urlSelect.add(option);
-}
 
-function selectUrl(indexToSelect) {
-    urlSelect.selectedIndex = indexToSelect;
-    urlSelect.onchange();
-}
-
-function setSelectedUrlValueTo(url) {
-    let option = urlSelect.options[urlSelect.selectedIndex];
-    option.value = url;
-    option.text = url;
-}
-
-function saveUserscript(event) {
-    let oldUrl = urlSelect.value;
-    let url = urlInput.value;
-    let script = scriptInput.value;
-    console.debug("saving: ", oldUrl, url, script);
-
-    event.preventDefault();
-    if (!url || !script) {
-        return;
+    function addUrlToSelect(url) {
+        let option = document.createElement("option");
+        option.value = url;
+        option.text = url;
+        urlSelect.add(option);
     }
-    if (oldUrl != url) {
-        if (scriptsByUrl[url]) {
-            alert(`Error: script for url '${url}' is already present!`);
+
+    function selectUrl(indexToSelect) {
+        urlSelect.selectedIndex = indexToSelect;
+        urlSelect.onchange();
+    }
+
+    function saveUserscript(event) {
+        let oldUrl = urlSelect.value;
+        let url = urlInput.value;
+        let script = scriptInput.value;
+        console.debug("saving: ", oldUrl, url, script);
+
+        event.preventDefault();
+        if (!url || !script) {
             return;
         }
-        if (oldUrl) {
-            setSelectedUrlValueTo(url);
-            delete scriptsByUrl[oldUrl];
-            browser.storage.local.remove(oldUrl).catch(error => alert("Failed to save config data: " + error));
-        } else {
-            addUrlToSelect(url);
-            urlSelect.selectedIndex = urlSelect.options.length - 1;
+        if (oldUrl != url) {
+            if (settings.scriptsByUrl[url]) {
+                alert(`Error: script for url '${url}' is already present!`);
+                return;
+            }
+            if (oldUrl) {
+                let selectedOption = urlSelect.options[urlSelect.selectedIndex];
+                selectedOption.value = url;
+                selectedOption.text = url;
+                delete settings.scriptsByUrl[oldUrl];
+            } else {
+                addUrlToSelect(url);
+                urlSelect.selectedIndex = urlSelect.options.length - 1;
+                removeButton.disabled = false;
+            }
         }
-
-        removeButton.disabled = false;
+        settings.scriptsByUrl[url] = script;
+        browser.storage.local.set(settings).catch(error => alert("Failed to save config data: " + error));  //hm... if store fails we'll end up with UI not matching storage
     }
-    scriptsByUrl[url] = script;
-    browser.storage.local.set(scriptsByUrl).catch(error => alert("Failed to save config data: " + error));
-}
 
-function removeSelectedUserscript() {
-    let index = urlSelect.selectedIndex;
-    let url = urlSelect.options[index].value;
 
-    return browser.storage.local.remove(url).then(() => {
-        urlSelect.options.remove(index);
-        delete scriptsByUrl[url];
-    }).catch(error => alert("Failed to save config data: " + error));
-}
-
-function exportSettings() {
-    let configDataAsUrl = "data:text/json," + encodeURIComponent(JSON.stringify(scriptsByUrl, null, "  "));
-    let something = window.open(configDataAsUrl, "_blank");
-    something.focus();
-}
-
-urlSelect.onchange = () => {
-    let url = urlSelect.value;
-    removeButton.disabled = !url;
-    urlInput.value = url;
-    scriptInput.value = scriptsByUrl[url] || "";
-};
-
-newButton.onclick = (event) => {
-    event.preventDefault();
-    selectUrl(-1);
-};
-
-removeButton.onclick = (event) => {
-    event.preventDefault();
-    if (confirm(`Really delete script for '${url}'?`)) {
-        removeSelectedUserscript().then(() => selectUrl(0));
+    function removeSelectedUserscript(event) {
+        let index = urlSelect.selectedIndex;
+        let url = urlSelect.options[index].value;
+        event.preventDefault();
+        if (confirm(`Really delete script for '${url}'?`)) {
+            urlSelect.options.remove(index);
+            selectUrl(0);
+            delete settings.scriptsByUrl[url];
+            browser.storage.local.set(settings).catch(error => alert("Failed to save config data: " + error));  //hm... if store fails we'll end up with UI not matching storage
+        }
     }
-};
 
-form.onsubmit = saveUserscript;
-exportButton.onclick = exportSettings;
+    function exportSettings() {
+        let configDataAsUrl = "data:text/json," + encodeURIComponent(JSON.stringify(settings, null, "  "));
+        let something = window.open(configDataAsUrl, "_blank");
+        something.focus();
+    }
+}
 
 document.addEventListener('DOMContentLoaded', init);
 
