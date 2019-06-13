@@ -3,6 +3,7 @@ var settings = {
 }
 
 function loadConfig() {
+    console.info("(re)loading config...")
     browser.storage.local.get(settings).then(storedSettings => {
         settings = storedSettings;
         console.info("(re)loaded userscripts for url patterns: " + Object.keys(settings.scriptsByUrl))
