@@ -15,7 +15,7 @@ loadConfig();
 browser.storage.onChanged.addListener(loadConfig);
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     let url = changeInfo.url;
-    if (url) {
+    if (url && changeInfo.status == "loading") {
         let matchedUrlPatterns = Object.keys(settings.scriptsByUrl).filter((urlPattern) => new RegExp(urlPattern).test(url));
         matchedUrlPatterns.forEach(urlPattern => {
             let script = settings.scriptsByUrl[urlPattern];
