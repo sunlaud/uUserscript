@@ -14,8 +14,8 @@ function loadConfig() {
 loadConfig();
 browser.storage.onChanged.addListener(loadConfig);
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    let url = changeInfo.url;
-    if (url && changeInfo.status == "loading") {
+    if (changeInfo.status == "loading") {
+        let url = tab.url
         let matchedUrlPatterns = Object.keys(settings.scriptsByUrl).filter((urlPattern) => new RegExp(urlPattern).test(url));
         matchedUrlPatterns.forEach(urlPattern => {
             let script = settings.scriptsByUrl[urlPattern];
@@ -23,4 +23,4 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             browser.tabs.executeScript(tabId, { code: script });
         })
     }
-});
+}, { properties: ["status"] });
