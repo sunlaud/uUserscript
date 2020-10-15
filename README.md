@@ -27,8 +27,8 @@ Core highlights:
         if (pingCounter % 5 == 0) {
             console.log(`pingCounter=${pingCounter}`)
             let pingSymbol = (pingCounter % 10 == 0) ? "★" : "☆"
-            let titleSuffix = ` ${pingSymbol}ads: ${amountAdsSkipped}${pingSymbol}`;
-            window.document.title = window.document.title.replace(/( .ads: [0-9]+.)*$/, titleSuffix)
+            let titleSuffix = ` ${pingSymbol} ads: ${amountAdsSkipped}`;
+            window.document.title = window.document.title.replace(/( . ads: [0-9]+)*$/, titleSuffix)
         }
         let adVideo = document.querySelector("#player-container .ad-interrupting video");
         if (adVideo && adVideo.duration - adVideo.currentTime > 0.1 ) {
